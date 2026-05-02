@@ -4,6 +4,8 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const path = require("path");
+const fs = require("fs");
 const { User, Project, Task } = require("./models");
 
 const app = express();
@@ -49,10 +51,6 @@ function adminOnly(req, res, next) {
   if (req.user?.role !== "Admin") return res.status(403).json({ msg: "admin only" });
   next();
 }
-
-app.get("/", (req, res) => {
-  res.json({ ok: true, msg: "Team Task Manager API" });
-});
 
 // auth area
 app.post("/api/register", async (req, res) => {
@@ -158,6 +156,21 @@ app.patch("/api/tasks/:id/status", authMid, async (req, res) => {
     return res.status(500).json({ msg: "status update err" });
   }
 });
+
+const publicDir = path.join(__dirname, "public");
+const indexPath = path.join(publicDir, "index.html");
+const hasFrontend = fs.existsSync(indexPath);
+
+if (hasFrontend) {
+  app.use(express.static(publicDir));
+  app.get("*", (req, res) => {
+    res.sendFile(indexPath);
+  });
+} else {
+  app.get("/", (req, res) => {
+    res.json({ ok: true, msg: "Team Task Manager API" });
+  });
+}
 
 app.listen(PORT, () => {
   console.log("server on", PORT);
