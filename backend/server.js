@@ -9,11 +9,25 @@ const fs = require("fs");
 const { User, Project, Task } = require("./models");
 
 const app = express();
-app.use(cors());
-app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
 const mongoUrl = process.env.MONGO_URI || "";
+const corsOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((v) => v.trim())
+  .filter(Boolean);
+
+app.use(
+  cors({
+    origin: corsOrigins.length ? corsOrigins : "*"
+  })
+);
+app.use(express.json());
+
+if (!mongoUrl) {
+  console.error("Missing MONGO_URI in environment (.env)");
+  process.exit(1);
+}
 
 mongoose
   .connect(mongoUrl)

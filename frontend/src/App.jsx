@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import Auth from "./Auth.jsx";
 import Dashboard from "./Dashboard.jsx";
 
-const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
+const API_BASE = (import.meta.env.VITE_API_URL || (import.meta.env.DEV ? "http://localhost:5000" : "")).replace(/\/$/, "");
 
 export default function App() {
   const [token, setToken] = useState("");
@@ -55,6 +55,19 @@ export default function App() {
     localStorage.removeItem("tm_user");
     setToken("");
     setUser(null);
+  }
+
+  if (!API_BASE) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-6">
+        <div className="max-w-lg text-center bg-slate-900 border border-slate-800 rounded-xl p-6">
+          <h1 className="text-xl font-semibold mb-2">API URL not configured</h1>
+          <p className="text-slate-400">
+            Set <code>VITE_API_URL</code> in your frontend environment to your backend Railway URL.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   return (
